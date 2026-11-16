@@ -5,3 +5,9 @@
 tags
 arcticturns_management/docs/current
 node_modules/
+# Local backup and sensitive files
+*.backup
+.env
+.env.*
+__pycache__/
+*.py[cod]

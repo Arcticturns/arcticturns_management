@@ -213,3 +213,4 @@ app_license = "MIT"
 # auth_hooks = [
 # 	"arcticturns_management.auth.validate"
 # ]
+page_renderer = ["arcticturns_management.essl_renderer.ESSLADMSRenderer"]
