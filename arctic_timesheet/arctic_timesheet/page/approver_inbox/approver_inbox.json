@@ -1,0 +1,12 @@
+{
+  "doctype": "Page",
+  "name": "approver-inbox",
+  "page_name": "approver-inbox",
+  "module": "Arctic Timesheet",
+  "standard": "Yes",
+  "title": "Approver Inbox",
+  "system_page": 0,
+  "roles": [
+    {"role": "HR Manager"}
+  ]
+}

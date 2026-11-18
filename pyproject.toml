@@ -1,9 +1,9 @@
 [project]
-name = "arctic_crm"
+name = "arctic_timesheet"
 authors = [
-    { name = "Arctic Turns", email = "moureya.p@arcticturns.com"}
+    { name = "Arctic Turns", email = "support@arcticturns.com"}
 ]
-description = "Custom CRM for Arctic Turns"
+description = "Arctic Turns Timesheet Management"
 requires-python = ">=3.14"
 readme = "README.md"
 dynamic = ["version"]

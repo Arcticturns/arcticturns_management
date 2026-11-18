@@ -1,6 +1,6 @@
-### Arctic Turns CRM
+### Arctic Timesheet
 
-Custom CRM for Arctic Turns
+Arctic Turns Timesheet Management
 
 ### Installation
 
@@ -9,7 +9,7 @@ You can install this app using the [bench](https://github.com/frappe/bench) CLI:
 ```bash
 cd $PATH_TO_YOUR_BENCH
 bench get-app $URL_OF_THIS_REPO --branch version-16
-bench install-app arctic_crm
+bench install-app arctic_timesheet
 ```
 
 ### Contributing
@@ -17,7 +17,7 @@ bench install-app arctic_crm
 This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
 
 ```bash
-cd apps/arctic_crm
+cd apps/arctic_timesheet
 pre-commit install
 ```
 

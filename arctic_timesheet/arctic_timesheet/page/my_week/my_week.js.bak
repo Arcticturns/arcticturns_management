@@ -1,0 +1,101 @@
+
+frappe.pages["my-week"].on_page_load = function (wrapper) {
+    const page = frappe.ui.make_app_page({
+        parent: wrapper,
+        title: "My Week",
+        single_column: true
+    });
+
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    const headers = days.map(day =>
+        `<th class="text-center">${day}</th>`
+    ).join("");
+
+    const inputs = days.map(day => `
+        <td>
+            <input type="number" class="form-control weekly-hours"
+                min="0" max="16" step="0.25" value="0"
+                aria-label="${day} hours">
+        </td>
+    `).join("");
+
+    $(page.body).html(`
+        <div class="frappe-card" style="padding:20px">
+            <h3>Weekly Timesheet</h3>
+           <div style="margin-bottom:20px; max-width:250px">
+    <label>Week Start Date (Monday)</label>
+    <input type="date" class="form-control" id="week-start-date">
+</div>
+            <div class="row">
+                <div class="col-md-3">
+                    <label>Activity Type</label>
+                    <div class="activity-field"></div>
+                </div>
+                <div class="col-md-3">
+                    <label>Project</label>
+                    <div class="project-field"></div>
+                </div>
+                <div class="col-md-3">
+                    <label>Task</label>
+                    <div class="task-field"></div>
+                </div>
+                <div class="col-md-3">
+                    <label>Description</label>
+                    <input type="text" class="form-control"
+                        id="work-description"
+                        placeholder="Enter work description">
+                </div>
+            </div>
+
+            <div style="overflow-x:auto; margin-top:25px">
+                <table class="table table-bordered">
+                    <thead><tr>${headers}</tr></thead>
+                    <tbody><tr>${inputs}</tr></tbody>
+                </table>
+            </div>
+
+            <h4>Total Hours:
+                <span id="weekly-total">0.00</span>
+            </h4>
+           <div style="margin-top:20px">
+    <button type="button"
+            class="btn btn-primary"
+            id="save-weekly-draft">
+        Save Draft
+    </button>
+</div>
+        </div>
+    `);
+
+    const linkControls = {};
+
+    [
+        { selector: ".activity-field", doctype: "Activity Type" },
+        { selector: ".project-field", doctype: "Project" },
+        { selector: ".task-field", doctype: "Task" }
+    ].forEach(item => {
+        const control = frappe.ui.form.make_control({
+            parent: $(page.body).find(item.selector),
+            df: {
+                fieldtype: "Link",
+                fieldname: item.doctype.toLowerCase().replaceAll(" ", "_"),
+                options: item.doctype,
+                placeholder: `Select ${item.doctype}`
+            },
+            render_input: true
+        });
+
+        linkControls[item.doctype] = control;
+    });
+
+    $(page.body).on("input", ".weekly-hours", function () {
+        let total = 0;
+
+        $(page.body).find(".weekly-hours").each(function () {
+            total += Number($(this).val()) || 0;
+        });
+
+        $(page.body).find("#weekly-total").text(total.toFixed(2));
+    });
+};

@@ -1,0 +1,426 @@
+
+frappe.pages["my-week"].on_page_load = function (wrapper) {
+    const page = frappe.ui.make_app_page({
+        parent: wrapper,
+        title: "My Week",
+        single_column: true
+    });
+
+    const $body = $(page.body);
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    let rowCounter = 0;
+    let loadedDraft = null;
+    let currentWeek = null;
+
+    const escapeHTML = (value) =>
+        $("<div>").text(value == null ? "" : String(value)).html();
+
+    $body.html(`
+        <div class="frappe-card" style="padding:20px">
+            <h3>Weekly Timesheet</h3>
+            <div style="max-width:260px;margin-bottom:15px">
+                <label>Week Start Date (Monday)</label>
+                <input type="date" class="form-control" id="week-start-date">
+            </div>
+            <div id="draft-info" style="margin-bottom:12px"></div>
+            <div style="overflow-x:auto">
+                <table class="table table-bordered" id="weekly-grid">
+                    <thead>
+                        <tr>
+                            <th style="min-width:180px">Activity Type</th>
+                            <th style="min-width:160px">Project</th>
+                            <th style="min-width:160px">Task</th>
+                            <th style="min-width:200px">Description</th>
+                            ${days.map(d => `<th style="min-width:85px">${d}</th>`).join("")}
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="weekly-rows"></tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4">Daily Total</th>
+                            ${days.map((_, i) => `<th class="day-total" data-day="${i}">0.00</th>`).join("")}
+                            <th id="weekly-total">0.00</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <button class="btn btn-default" id="add-weekly-row">Add Row</button>
+            <button class="btn btn-primary" id="save-weekly-grid" style="margin-left:8px">
+                Save Draft
+            </button>
+            <button class="btn btn-success" id="submit-weekly-grid"
+                style="margin-left:8px">Submit Timesheet</button>
+        </div>
+    `);
+
+
+    function loadWeekStatus(startDate) {
+        frappe.call({
+            method: "arctic_timesheet.api.get_my_week_status",
+            args: { start_date: startDate },
+            callback: function(r) {
+                const records = r.message || [];
+                const $status = $body.find("#week-status-list");
+                $status.empty();
+
+                if (!records.length) {
+                    $status.text("No existing Timesheets for this week.");
+                    return;
+                }
+
+                const locked = records.some(item =>
+                    item.docstatus === 1 &&
+                    ["Submitted", "Approved", "Rejected"].includes(item.workflow_state)
+                );
+
+                $body.find("#add-weekly-row, #save-weekly-grid, #submit-weekly-grid")
+                    .prop("disabled", locked);
+
+                if (locked) {
+                    $body.find("#draft-info").text(
+                        "Timesheet already submitted for this week. Editing locked."
+                    );
+                }
+
+                records.forEach(item => {
+                    const $line = $("<div>").css("margin-bottom", "6px");
+
+                    const $link = $("<a>")
+                        .attr("href", "/desk/timesheet/" + encodeURIComponent(item.name))
+                        .text(item.name);
+
+                    $line.append($link);
+                    $line.append(
+                        $("<span>").text(
+                            " | " + item.workflow_state +
+                            " | " + item.total_hours + " hours"
+                        )
+                    );
+
+                    if (item.workflow_state === "Rejected") {
+                        $line.append(
+                            $("<span>")
+                                .css({
+                                    color: "#b45309",
+                                    fontWeight: "bold",
+                                    marginLeft: "10px"
+                                })
+                                .text(
+                                    "Correction required: Open Timesheet, " +
+                                    "Cancel, Amend, correct hours, Save and Submit."
+                                )
+                        );
+                    }
+
+                    $status.append($line);
+                });
+            }
+        });
+    }
+
+    $body.append(`
+        <div class="frappe-card" style="padding:20px;margin-top:15px">
+            <h4>Week Timesheet Status</h4>
+            <div id="week-status-list">Loading...</div>
+        </div>
+    `);
+
+    function validMonday(dateString) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString || "")) return false;
+        const [y, m, d] = dateString.split("-").map(Number);
+        const dt = new Date(Date.UTC(y, m - 1, d));
+        return dt.getUTCFullYear() === y &&
+            dt.getUTCMonth() === m - 1 &&
+            dt.getUTCDate() === d &&
+            dt.getUTCDay() === 1;
+    }
+
+    function addRow(data = {}) {
+        if ($body.find(".weekly-row").length >= 20) {
+            frappe.msgprint("Maximum 20 activity rows allowed.");
+            return;
+        }
+
+        const id = ++rowCounter;
+        const $row = $(`
+            <tr class="weekly-row" data-row="${id}">
+                <td><div class="activity-control"></div></td>
+                <td><div class="project-control"></div></td>
+                <td><div class="task-control"></div></td>
+                <td><input type="text" class="form-control row-description"></td>
+                ${days.map((d, i) => `
+                    <td><input type="number" class="form-control day-hours"
+                        data-day="${i}" min="0" max="16" step="0.25"
+                        aria-label="${d} hours" value="0"></td>
+                `).join("")}
+                <td class="row-total">0.00</td>
+                <td><button type="button" class="btn btn-default btn-xs remove-row">
+                    Remove
+                </button></td>
+            </tr>
+        `);
+
+        $body.find("#weekly-rows").append($row);
+
+        const controls = {};
+
+        [
+            ["activity_type", "Activity Type", ".activity-control"],
+            ["project", "Project", ".project-control"],
+            ["task", "Task", ".task-control"]
+        ].forEach(([fieldname, doctype, selector]) => {
+            const control = frappe.ui.form.make_control({
+                parent: $row.find(selector),
+                df: {
+                    fieldtype: "Link",
+                    fieldname: `${fieldname}_${id}`,
+                    options: doctype,
+                    placeholder: doctype
+                },
+                render_input: true
+            });
+            controls[fieldname] = control;
+            control.set_value(data[fieldname] || "");
+        });
+
+        $row.data("controls", controls);
+        $row.find(".row-description").val(data.description || "");
+
+        const hours = Array.isArray(data.hours) ? data.hours : [];
+        $row.find(".day-hours").each(function (i) {
+            $(this).val(hours[i] ?? 0);
+        });
+
+        calculateTotals();
+    }
+
+    function calculateTotals() {
+        const daily = Array(7).fill(0);
+
+        $body.find(".weekly-row").each(function () {
+            let rowTotal = 0;
+            $(this).find(".day-hours").each(function () {
+                const day = Number($(this).data("day"));
+                const value = Number($(this).val()) || 0;
+                daily[day] += value;
+                rowTotal += value;
+            });
+            $(this).find(".row-total").text(rowTotal.toFixed(2));
+        });
+
+        daily.forEach((total, i) => {
+            $body.find(`.day-total[data-day="${i}"]`).text(total.toFixed(2));
+        });
+
+        $body.find("#weekly-total").text(
+            daily.reduce((a, b) => a + b, 0).toFixed(2)
+        );
+    }
+
+    function loadWeek() {
+        const startDate = $body.find("#week-start-date").val();
+
+        loadedDraft = null;
+        currentWeek = null;
+        $body.find("#add-weekly-row, #save-weekly-grid, #submit-weekly-grid")
+            .prop("disabled", true);
+        $body.find("#draft-info").text("Loading week...");
+
+        if (!validMonday(startDate)) {
+            frappe.msgprint("Please select a valid Monday.");
+            return;
+        }
+
+        frappe.call({
+            method: "arctic_timesheet.api.get_weekly_draft",
+            args: { start_date: startDate },
+            freeze: true,
+            callback(r) {
+                if (r.exc) return;
+
+                const result = r.message || {};
+                loadedDraft = result.name || null;
+                currentWeek = startDate;
+                $body.find("#add-weekly-row, #save-weekly-grid, #submit-weekly-grid")
+                    .prop("disabled", false);
+                loadWeekStatus(startDate);
+                $body.find("#weekly-rows").empty();
+
+                const rows = result.rows && result.rows.length
+                    ? result.rows
+                    : [{}];
+
+                rows.forEach(addRow);
+
+                $body.find("#draft-info").text(
+                    loadedDraft
+                        ? `Editing Draft: ${loadedDraft}`
+                        : "New Weekly Draft"
+                );
+            }
+        });
+    }
+
+    $body.on("click", "#add-weekly-row", function () {
+        if (currentWeek !== $body.find("#week-start-date").val()) {
+            frappe.msgprint("Load the selected week first.");
+            return;
+        }
+        addRow();
+    });
+
+    $body.on("click", ".remove-row", function () {
+        if ($body.find(".weekly-row").length <= 1) {
+            frappe.msgprint("At least one row is required.");
+            return;
+        }
+        $(this).closest("tr").remove();
+        calculateTotals();
+    });
+
+    $body.on("input", ".day-hours", calculateTotals);
+
+    $body.on("change", "#week-start-date", loadWeek);
+
+    $body.on("click", "#save-weekly-grid", function () {
+        const startDate = $body.find("#week-start-date").val();
+
+        if (!validMonday(startDate) || currentWeek !== startDate) {
+            frappe.msgprint("Select and load a valid Monday first.");
+            return;
+        }
+
+        const rows = [];
+        const daily = Array(7).fill(0);
+        let invalid = false;
+
+        $body.find(".weekly-row").each(function () {
+            const $row = $(this);
+            const controls = $row.data("controls");
+            const hours = $row.find(".day-hours").map(function () {
+                return Number($(this).val());
+            }).get();
+
+            if (hours.some(h => !Number.isFinite(h) || h < 0 ||
+                h > 16 || !Number.isInteger(h * 4))) {
+                invalid = true;
+            }
+
+            hours.forEach((h, i) => daily[i] += h);
+
+            rows.push({
+                activity_type: controls.activity_type.get_value(),
+                project: controls.project.get_value(),
+                task: controls.task.get_value(),
+                description: $row.find(".row-description").val(),
+                hours
+            });
+        });
+
+        if (invalid || daily.some(h => h > 16) ||
+            daily.every(h => h === 0)) {
+            frappe.msgprint("Invalid hours. Maximum 16 hours per day, in 0.25 increments.");
+            return;
+        }
+
+        if (rows.some(r => !r.activity_type &&
+            r.hours.some(h => h > 0))) {
+            frappe.msgprint("Activity Type is required for rows with hours.");
+            return;
+        }
+
+        const activeRows = rows.filter(r => r.hours.some(h => h > 0));
+
+        if (!activeRows.length) {
+            frappe.msgprint("Enter at least one work entry.");
+            return;
+        }
+
+        frappe.call({
+            method: "arctic_timesheet.api.save_weekly_grid",
+            type: "POST",
+            args: {
+                start_date: startDate,
+                rows: JSON.stringify(activeRows)
+            },
+            freeze: true,
+            freeze_message: "Saving weekly draft...",
+            callback(r) {
+                if (r.exc) return;
+                const result = r.message || {};
+                frappe.show_alert({
+                    message: `Draft saved: ${escapeHTML(result.name)}`,
+                    indicator: "green"
+                });
+                loadWeek();
+            }
+        });
+    });
+
+
+    $body.on("click", "#submit-weekly-grid", function () {
+        const startDate = $body.find("#week-start-date").val();
+
+        if (!validMonday(startDate) || currentWeek !== startDate) {
+            frappe.msgprint("Select and load a valid Monday first.");
+            return;
+        }
+
+        if (!loadedDraft) {
+            frappe.msgprint("Save Draft before submitting.");
+            return;
+        }
+
+        frappe.confirm(
+            "Submit this Timesheet for approval? Save any changes first.",
+            function () {
+                frappe.call({
+                    method: "arctic_timesheet.api.submit_my_week",
+                    type: "POST",
+                    args: { start_date: startDate },
+                    freeze: true,
+                    freeze_message: "Submitting Timesheet...",
+                    callback(r) {
+                        if (r.exc) return;
+
+                        const result = r.message || {};
+
+                        frappe.msgprint(
+                            `Timesheet ${result.name} submitted. Status: ${result.workflow_state}`
+                        );
+
+                        $body.find("#save-weekly-grid, #submit-weekly-grid")
+                            .prop("disabled", true);
+                    }
+                });
+            }
+        );
+    });
+
+    const today = new Date();
+    const monday = new Date(today);
+    const offset = (today.getDay() + 6) % 7;
+    monday.setDate(today.getDate() - offset);
+
+    const localDate = [
+        monday.getFullYear(),
+        String(monday.getMonth() + 1).padStart(2, "0"),
+        String(monday.getDate()).padStart(2, "0")
+    ].join("-");
+
+    $body.find("#week-start-date").val(localDate);
+
+    // Administrator may not have an Employee mapping.
+    // Load the grid only when an employee-linked user is logged in.
+    if (frappe.session.user !== "Administrator") {
+        loadWeek();
+    } else {
+        $body.find("#draft-info").text(
+            "Administrator: switch to an employee-linked login to load or save My Week."
+        );
+        addRow();
+    }
+};
