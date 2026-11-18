@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "field:competitor_name",
+ "creation": "2026-10-22 10:44:57.239576",
+ "custom": 0,
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_lall",
+  "competitor_name",
+  "website",
+  "description",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_lall",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "competitor_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Competitor Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Website"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-22 10:51:29.907817",
+ "modified_by": "Administrator",
+ "module": "Arctic Turns CRM",
+ "name": "AT Competitor",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "competitor_name"
+}
