@@ -1,0 +1,100 @@
+{
+ "app": "arcticturns_management",
+ "charts": [
+  {
+   "chart_name": "CEO Salesperson Won Revenue",
+   "label": "CEO Salesperson Won Revenue"
+  },
+  {
+   "chart_name": "CEO Salesperson Pipeline Value",
+   "label": "CEO Salesperson Pipeline Value"
+  },
+  {
+   "chart_name": "CEO Sales Target Achievement",
+   "label": "CEO Sales Target Achievement"
+  },
+  {
+   "chart_name": "CEO Sales Target Amount",
+   "label": "CEO Sales Target Amount"
+  }
+ ],
+ "content": "[{\"id\":\"tHciujp32t\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Welcome to the Arctic Turns CEO Dashboard workspace</span>\",\"col\":12}},{\"id\":\"zReiUEi7Di\",\"type\":\"paragraph\",\"data\":{\"text\":\"Click on \\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t to edit\",\"col\":12}},{\"id\":\"iN2rtDI0Zk\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Leads\",\"col\":4}},{\"id\":\"vTJNHhfNvj\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Active Deals\",\"col\":4}},{\"id\":\"bvHxX9UnXe\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pipeline Value\",\"col\":4}},{\"id\":\"GT6e5F0_gi\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Won Revenue\",\"col\":4}},{\"id\":\"_FkwHWFrF6\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Lost Deals\",\"col\":4}},{\"id\":\"vARdwmFCQB\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Overdue Leads\",\"col\":4}},{\"id\":\"_2z3HBShhD\",\"type\":\"chart\",\"data\":{\"chart_name\":\"CEO Salesperson Won Revenue\",\"col\":12}},{\"id\":\"pFmUOtUrRZ\",\"type\":\"chart\",\"data\":{\"chart_name\":\"CEO Salesperson Pipeline Value\",\"col\":12}},{\"id\":\"SF6ccjU5Ku\",\"type\":\"chart\",\"data\":{\"chart_name\":\"CEO Sales Target Achievement\",\"col\":12}},{\"id\":\"qWug0V7RQ6\",\"type\":\"chart\",\"data\":{\"chart_name\":\"CEO Sales Target Amount\",\"col\":12}},{\"id\":\"RskjMXoUXX\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Ceo Salesperson Performance\",\"col\":3}}]",
+ "creation": "2026-11-10 14:54:23.346061",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "chart",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Arctic Turns CEO Dashboard",
+ "link_type": "DocType",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Performance",
+   "link_count": 0,
+   "link_to": "CEO Salesperson Performance",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "CRM Deal",
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-11-12 14:08:37.927699",
+ "modified_by": "Administrator",
+ "module": "Arctic Turns CRM",
+ "name": "Arctic Turns CEO Dashboard",
+ "number_cards": [
+  {
+   "label": "Total Leads",
+   "number_card_name": "Total Leads"
+  },
+  {
+   "label": "Active Deals",
+   "number_card_name": "Active Deals"
+  },
+  {
+   "label": "Pipeline Value",
+   "number_card_name": "Pipeline Value"
+  },
+  {
+   "label": "Won Revenue",
+   "number_card_name": "Won Revenue"
+  },
+  {
+   "label": "Lost Deals",
+   "number_card_name": "Lost Deals"
+  },
+  {
+   "label": "Overdue Leads",
+   "number_card_name": "Overdue Leads"
+  }
+ ],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "CEO"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Ceo Salesperson Performance",
+   "link_to": "CEO Salesperson Performance",
+   "report_ref_doctype": "CRM Deal",
+   "type": "Report"
+  }
+ ],
+ "title": "Arctic Turns CEO Dashboard",
+ "type": "Workspace"
+}

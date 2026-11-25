@@ -4,6 +4,7 @@ app_publisher = "arcticturns"
 app_description = "The Basic Arcticturns Management"
 app_email = "pugazhenthi.arcticturns@gmail.com"
 app_license = "MIT"
+required_apps = ["crm"]
 
 # Includes in <head>
 # ------------------
@@ -214,3 +215,57 @@ app_license = "MIT"
 # 	"arcticturns_management.auth.validate"
 # ]
 page_renderer = ["arcticturns_management.essl_renderer.ESSLADMSRenderer"]
+
+# Arctic Turns CRM hooks
+doc_events = {
+    "CRM Lead": {
+        "after_insert": "arcticturns_management.tasks.set_first_contact_deadline",
+        "validate": "arcticturns_management.tasks.validate_lead_duplicates"
+    },
+    "CRM Deal": {
+        "validate": "arcticturns_management.tasks.validate_won_deal_value"
+    }
+}
+
+scheduler_events = {
+    "daily": [
+        "arcticturns_management.tasks.check_overdue_lead_slas",
+        "arcticturns_management.tasks.update_sales_target_achievement"
+    ]
+}
+
+fixtures = [
+    {
+        "dt": "Custom Field",
+        "filters": [
+            ["dt", "in", ["CRM Lead", "CRM Deal", "Sales Target"]]
+        ]
+    },
+    {
+        "dt": "Property Setter",
+        "filters": [
+            ["doc_type", "in", ["CRM Lead", "CRM Deal", "Sales Target"]]
+        ]
+    },
+    {
+        "dt": "CRM Fields Layout",
+        "filters": [
+            ["name", "in", [
+                "CRM Deal-Data Fields",
+                "CRM Deal-Quick Entry",
+                "CRM Deal-Side Panel"
+            ]]
+        ]
+    },
+    {"dt": "Number Card", "filters": [["name", "in", ["Total Leads", "Active Deals", "Pipeline Value", "Won Revenue", "Lost Deals", "Overdue Leads"]]]},
+    {"dt": "Dashboard Chart", "filters": [["name", "in", ["CEO Sales Target Achievement", "CEO Sales Target Amount", "CEO Salesperson Pipeline Value", "CEO Salesperson Won Revenue"]]]},
+    {"dt": "Report", "filters": [["name", "in", ["CEO Salesperson Performance"]]]}
+]
+
+permission_query_conditions = {
+    "Sales Target": "arcticturns_management.permissions.sales_target_permission_query"
+}
+
+has_permission = {
+    "Sales Target": "arcticturns_management.permissions.sales_target_has_permission"
+}
