@@ -214,6 +214,7 @@ required_apps = ["crm"]
 # auth_hooks = [
 # 	"arcticturns_management.auth.validate"
 # ]
+
 page_renderer = ["arcticturns_management.essl_renderer.ESSLADMSRenderer"]
 
 # Arctic Turns CRM hooks
