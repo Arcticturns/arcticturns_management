@@ -218,15 +218,11 @@ required_apps = ["crm"]
 page_renderer = ["arcticturns_management.essl_renderer.ESSLADMSRenderer"]
 
 # Arctic Turns CRM hooks
-doc_events = {
-    "CRM Lead": {
-        "after_insert": "arcticturns_management.tasks.set_first_contact_deadline",
-        "validate": "arcticturns_management.tasks.validate_lead_duplicates"
-    },
-    "CRM Deal": {
-        "validate": "arcticturns_management.tasks.validate_won_deal_value"
-    }
-}
+doc_events = {'CRM Lead': {'after_insert': 'arcticturns_management.tasks.set_first_contact_deadline',
+              'validate': 'arcticturns_management.tasks.validate_lead_duplicates'},
+ 'CRM Deal': {'validate': 'arcticturns_management.tasks.validate_won_deal_value'},
+ 'Timesheet': {'validate': 'arcticturns_management.timesheet_validation.validate_timesheet',
+               'before_submit': 'arcticturns_management.timesheet_validation.validate_timesheet'}}
 
 scheduler_events = {
     "daily": [
@@ -235,33 +231,42 @@ scheduler_events = {
     ]
 }
 
-fixtures = [
-    {
-        "dt": "Custom Field",
-        "filters": [
-            ["dt", "in", ["CRM Lead", "CRM Deal", "Sales Target"]]
-        ]
-    },
-    {
-        "dt": "Property Setter",
-        "filters": [
-            ["doc_type", "in", ["CRM Lead", "CRM Deal", "Sales Target"]]
-        ]
-    },
-    {
-        "dt": "CRM Fields Layout",
-        "filters": [
-            ["name", "in", [
-                "CRM Deal-Data Fields",
-                "CRM Deal-Quick Entry",
-                "CRM Deal-Side Panel"
-            ]]
-        ]
-    },
-    {"dt": "Number Card", "filters": [["name", "in", ["Total Leads", "Active Deals", "Pipeline Value", "Won Revenue", "Lost Deals", "Overdue Leads"]]]},
-    {"dt": "Dashboard Chart", "filters": [["name", "in", ["CEO Sales Target Achievement", "CEO Sales Target Amount", "CEO Salesperson Pipeline Value", "CEO Salesperson Won Revenue"]]]},
-    {"dt": "Report", "filters": [["name", "in", ["CEO Salesperson Performance"]]]}
-]
+fixtures = [{'dt': 'Custom Field',
+  'filters': [['dt',
+               'in',
+               ['CRM Lead', 'CRM Deal', 'Sales Target', 'Timesheet', 'Timesheet Detail']]]},
+ {'dt': 'Property Setter',
+  'filters': [['doc_type',
+               'in',
+               ['CRM Lead', 'CRM Deal', 'Sales Target', 'Timesheet', 'Timesheet Detail']]]},
+ {'dt': 'CRM Fields Layout',
+  'filters': [['name',
+               'in',
+               ['CRM Deal-Data Fields', 'CRM Deal-Quick Entry', 'CRM Deal-Side Panel']]]},
+ {'dt': 'Number Card',
+  'filters': [['name',
+               'in',
+               ['Total Leads',
+                'Active Deals',
+                'Pipeline Value',
+                'Won Revenue',
+                'Lost Deals',
+                'Overdue Leads']]]},
+ {'dt': 'Dashboard Chart',
+  'filters': [['name',
+               'in',
+               ['CEO Sales Target Achievement',
+                'CEO Sales Target Amount',
+                'CEO Salesperson Pipeline Value',
+                'CEO Salesperson Won Revenue']]]},
+ {'dt': 'Report', 'filters': [['name', 'in', ['CEO Salesperson Performance']]]},
+ {'dt': 'Workflow', 'filters': [['document_type', '=', 'Timesheet']]},
+ {'dt': 'Workflow State',
+  'filters': [['name', 'in', ['Draft', 'Submitted', 'Approved', 'Rejected', 'Cancelled']]]},
+ {'dt': 'Workflow Action Master',
+  'filters': [['name', 'in', ['Submit', 'Approve', 'Reject', 'Resubmit', 'Cancel']]]},
+ {'dt': 'Role', 'filters': [['name', '=', 'AT Timesheet Approver']]},
+ {'dt': 'Custom DocPerm', 'filters': [['parent', 'in', ['Timesheet', 'Task']]]}]
 
 permission_query_conditions = {
     "Sales Target": "arcticturns_management.permissions.sales_target_permission_query"
@@ -269,4 +274,8 @@ permission_query_conditions = {
 
 has_permission = {
     "Sales Target": "arcticturns_management.permissions.sales_target_has_permission"
+}
+
+doctype_js = {
+	"Timesheet": "public/js/timesheet_task.js",
 }
