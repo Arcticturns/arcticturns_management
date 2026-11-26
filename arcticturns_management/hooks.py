@@ -27,9 +27,7 @@ app_license = "MIT"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {
-	"Timesheet": "public/js/timesheet_task.js",
-}
+# doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -118,12 +116,13 @@ doctype_js = {
 # ---------------
 # Hook on document methods and events
 
-doc_events = {
-	"Timesheet": {
-		"validate": "arcticturns_management.timesheet_validation.validate_timesheet",
-		"before_submit": "arcticturns_management.timesheet_validation.validate_timesheet",
-	}
-}
+# doc_events = {
+# 	"*": {
+# 		"on_update": "method",
+# 		"on_cancel": "method",
+# 		"on_trash": "method"
+# 	}
+# }
 
 # Scheduled Tasks
 # ---------------
@@ -215,44 +214,3 @@ doc_events = {
 # 	"arcticturns_management.auth.validate"
 # ]
 page_renderer = ["arcticturns_management.essl_renderer.ESSLADMSRenderer"]
-
-fixtures = [
-	{
-		"dt": "Custom Field",
-		"filters": [[
-			"name",
-			"in",
-			[
-				"Timesheet-workflow_state",
-				"Timesheet-salary_slip",
-				"Timesheet-custom_expected_hours",
-				"Timesheet-custom_leave__holiday_work_reason",
-				"Timesheet-custom_shortfall_reason",
-			],
-		]],
-	},
-	{
-		"dt": "Workflow",
-		"filters": [["document_type", "=", "Timesheet"]],
-	},
-	{
-		"dt": "Workflow State",
-		"filters": [["name", "in", ["Draft", "Submitted", "Approved", "Rejected", "Cancelled"]]],
-	},
-	{
-		"dt": "Workflow Action Master",
-		"filters": [["name", "in", ["Submit", "Approve", "Reject", "Resubmit", "Cancel"]]],
-	},
-	{
-		"dt": "Role",
-		"filters": [["name", "=", "AT Timesheet Approver"]],
-	},
-	{
-		"dt": "Property Setter",
-		"filters": [["doc_type", "in", ["Timesheet", "Timesheet Detail"]]],
-	},
-	{
-		"dt": "Custom DocPerm",
-		"filters": [["parent", "in", ["Timesheet", "Task"]]],
-	},
-]
